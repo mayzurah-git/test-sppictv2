@@ -83,7 +83,7 @@ class DashboardController extends Controller
         $activeMeetings = Meeting::where('status', 'Aktif')->orderBy('date', 'asc')->get();
 
         // 2. Get User's Projects (latest 5)
-        $projects = Project::where('created_by', $user->id)
+        $projects = Project::where('agency_id', $user->agency_id)
                             ->latest()
                             ->paginate(5);
 

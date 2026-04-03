@@ -49,14 +49,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{project}/status/edit', 'createStatusUpdate')->name('status.edit')->middleware('role:Urus Setia');
         Route::delete('/{project}', 'destroy')->name('destroy');
         Route::patch('/{project}/status', 'updateStatus')->name('updateStatus')->middleware('role:Urus Setia');
+        Route::patch('/projects/{project}/remarks', [App\Http\Controllers\ProjectController::class, 'updateRemarks'])->name('projects.remarks.update')->middleware('role:Urus Setia');
+
 
         // Route Perincian Projek (Details) - Bersarang di bawah projek
         Route::prefix('/{project}/details')->name('details.')->group(function () {
-            Route::get('/create', 'createDetail')->name('create');
-            Route::post('/', 'storeDetail')->name('store');
-            Route::get('/{detail}/edit', 'editDetail')->name('edit');
-            Route::patch('/{detail}', 'updateDetail')->name('update');
-            Route::delete('/{detail}', 'destroyDetail')->name('destroy');
+        Route::get('/create', 'createDetail')->name('create');
+        Route::post('/', 'storeDetail')->name('store');
+        Route::get('/{detail}/edit', 'editDetail')->name('edit');
+        Route::patch('/{detail}', 'updateDetail')->name('update');
+        Route::delete('/{detail}', 'destroyDetail')->name('destroy');
         });
 
         // Route Dokumen Projek - Bersarang di bawah projek
@@ -76,5 +78,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         Route::resource('meetings', MeetingController::class)->except(['show'])->middleware('role:Urus Setia');
+
+        Route::middleware(['auth','role:Urus Setia'])->group(function () {
+
+            Route::get('/mesyuarat',
+                [ProjectController::class,'meetingIndex'])
+                ->name('meetings.index');
+
+            Route::get('/mesyuarat/create',
+                [ProjectController::class,'meetingCreate'])
+                ->name('meetings.create');
+
+            Route::post('/mesyuarat',
+                [ProjectController::class,'meetingStore'])
+                ->name('meetings.store');
+
+            Route::get('/mesyuarat/{meeting}',
+                [ProjectController::class,'meetingShow'])
+                ->name('meetings.show');
+
+        });
 
 });

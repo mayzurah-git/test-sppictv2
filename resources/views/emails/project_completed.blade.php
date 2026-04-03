@@ -24,6 +24,13 @@
         </tr>
     </table>
 
+    @if($project->urusetia_remarks)
+    <div style="border: 1px solid #5cb85c; background-color: #dff0d8; padding: 15px; border-radius: 4px; color: #3c763d; margin-bottom: 20px;">
+        <h4 style="margin-top: 0;">Ulasan Urus Setia:</h4>
+        <p style="white-space: pre-wrap;">{{ $project->urusetia_remarks }}</p>
+    </div>
+    @endif
+
     <p>Permohonan ini akan dibawa untuk pembentangan dalam Mesyuarat Jawatankuasa Teknikal ICT (JTKICT) yang akan datang.</p>
     
     <p>Terima Kasih,<br>Urus Setia<br>SPPICT</p>

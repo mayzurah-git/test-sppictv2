@@ -145,6 +145,106 @@
                 </div>
             </div>
 
+            @if($project->urusetia_remarks)
+                <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 shadow-sm rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <!-- Ikon Info -->
+                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-bold text-yellow-800 uppercase tracking-wider">
+                                Ulasan Urus Setia
+                            </h3>
+                            <div class="mt-2 text-sm text-yellow-700 whitespace-pre-wrap font-medium">
+                                {{ $project->urusetia_remarks }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Borang Kemaskini Ulasan Sahaja (Urus Setia) --}}
+            @if(Auth::user()->role->role_name === 'Urus Setia')
+            <div class="bg-white shadow-sm sm:rounded-lg p-6 border-t-4 border-indigo-500">
+                <h3 class="text-lg font-semibold mb-4 text-indigo-800">Kemaskini Ulasan (Urus Setia Sahaja)</h3>
+                <form action="{{ route('projects.remarks.update', $project->id) }}" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <textarea name="urusetia_remarks" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200" placeholder="Masukkan ulasan di sini...">{{ old('urusetia_remarks', $project->urusetia_remarks) }}</textarea>
+                    <div class="mt-3 flex justify-end">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm font-bold shadow transition">
+                            Simpan Ulasan Sahaja
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @endif
+
+            {{-- Card 4: Sejarah Ulasan --}}
+            @if(Auth::user()->isUrusetia())
+            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-6 flex items-center text-gray-800">
+                    <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Sejarah Ulasan & Maklum Balas
+                </h3>
+                
+                <div class="flow-root">
+                    <ul role="list" class="-mb-8">
+                        @forelse($remarksHistory as $log)
+                            @php
+                                // Memastikan data ditukar kepada array jika ia disimpan sebagai string JSON
+                                $newVals = is_array($log->new_values) ? $log->new_values : json_decode($log->new_values, true);
+                            @endphp
+                            @if(isset($newVals['urusetia_remarks']) || isset($newVals['application_status']))
+                            <li>
+                                <div class="relative pb-8">
+                                    @if (!$loop->last)
+                                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                    @endif
+                                    <div class="relative flex space-x-3">
+                                        <div>
+                                            <span class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center ring-8 ring-white text-indigo-600 font-bold text-xs uppercase">
+                                                {{ substr($log->user->name ?? 'U', 0, 1) }}
+                                            </span>
+                                        </div>
+                                        <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                                            <div>
+                                                <p class="text-sm text-gray-500">
+                                                    <span class="font-medium text-gray-900">{{ $log->user->name ?? 'Urus Setia' }}</span> 
+                                                    mengemaskini maklum balas
+                                                </p>
+                                                @if(isset($newVals['urusetia_remarks']))
+                                                    <div class="mt-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100 italic">
+                                                        "{!! nl2br(e($newVals['urusetia_remarks'])) !!}"
+                                                    </div>
+                                                @endif
+                                                @if(isset($newVals['application_status']))
+                                                    <p class="mt-1 text-xs text-gray-500">
+                                                        Status pada waktu ini: <span class="font-bold text-indigo-600">{{ $newVals['application_status'] }}</span>
+                                                    </p>
+                                                @endif
+                                            </div>
+                                            <div class="whitespace-nowrap text-right text-xs text-gray-400">
+                                                {{ $log->created_at->format('d/m/Y H:i') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            @endif
+                        @empty
+                            <li class="text-sm text-gray-500 italic text-center py-4">Tiada sejarah ulasan direkodkan.</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+            @endif
+
             {{-- Back Button --}}
             <div class="text-center">
                 <a href="{{ route('projects.index') }}" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded font-medium">

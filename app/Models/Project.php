@@ -46,4 +46,9 @@ class Project extends Model
     {
         return $this->hasMany(ProjectDetail::class);
     }
+
+    public function meeting()
+    {
+        return $this->belongsTo(Meeting::class);
+    }
 }

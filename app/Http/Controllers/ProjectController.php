@@ -215,11 +215,6 @@ class ProjectController extends Controller
             'urusetia_remarks.required' => 'Ulasan perlu diisi jika status adalah "Tidak Lengkap".'
         ]);
 
-        // Jika status 'Lengkap', pastikan ulasan dikosongkan
-        if ($validatedData['application_status'] === 'Lengkap') {
-            $validatedData['urusetia_remarks'] = null;
-        }
-
         $project->update($validatedData);
 
         if ($project->wasChanged()) {
@@ -263,6 +258,46 @@ class ProjectController extends Controller
         }
 
         return back()->with('success', 'Status projek berjaya dikemaskini' . ($emailNotificationMsg ?? ''));
+    }
+
+    public function updateRemarks(Request $request, Project $project)
+    {
+        // Hanya Urus Setia boleh kemaskini ulasan
+        if (Auth::user()->role->role_name !== 'Urus Setia') {
+            abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI');
+        }
+
+        $request->validate([
+            'urusetia_remarks' => 'nullable|string|max:5000',
+        ]);
+
+        $project->update([
+            'urusetia_remarks' => $request->urusetia_remarks
+        ]);
+
+        if ($project->wasChanged()) {
+            $changes = $project->getChanges();
+            unset($changes['updated_at']);
+            
+            $old_values = [];
+            foreach (array_keys($changes) as $attribute) {
+                $old_values[$attribute] = $project->getOriginal($attribute);
+            }
+
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'event' => 'remarks_updated',
+                'auditable_type' => Project::class,
+                'auditable_id' => $project->id,
+                'old_values' => $old_values,
+                'new_values' => $changes,
+                'url' => request()->fullUrl(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        }
+
+        return back()->with('success', 'Ulasan Urus Setia berjaya dikemaskini tanpa menukar status.');
     }
 
     public function createStatusUpdate(Project $project)
@@ -333,7 +368,19 @@ class ProjectController extends Controller
             abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI');
         }
 
-        return view('projects.show', compact('project'));
+        $remarksHistory = collect();
+
+        // Hanya ambil sejarah jika pengguna adalah Urus Setia
+        if ($user->isUrusetia()) {
+            $remarksHistory = AuditLog::where('auditable_type', Project::class)
+                ->where('auditable_id', $project->id)
+                ->whereIn('event', ['status_updated', 'remarks_updated'])
+                ->with('user')
+                ->latest()
+                ->get();
+        }
+
+        return view('projects.show', compact('project', 'remarksHistory'));
     }
 
     public function print(Project $project)

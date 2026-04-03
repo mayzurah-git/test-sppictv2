@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Project;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -13,12 +14,14 @@ class ProjectCompletedNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $project;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(Project $project)
     {
-        //
+        $this->project = $project;
     }
 
     /**
@@ -27,7 +30,7 @@ class ProjectCompletedNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Project Completed Notification',
+            subject: 'Maklum Balas Permohonan Projek: Lengkap (' . $this->project->project_code . ')',
         );
     }
 
@@ -37,7 +40,7 @@ class ProjectCompletedNotification extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.project_completed',
         );
     }
 

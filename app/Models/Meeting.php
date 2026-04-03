@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Meeting extends Model
 {
     use HasFactory;
@@ -27,4 +28,8 @@ class Meeting extends Model
         'project_update_deadline' => 'date',
     ];
 
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
 }
