@@ -49,7 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{project}/status/edit', 'createStatusUpdate')->name('status.edit')->middleware('role:Urus Setia');
         Route::delete('/{project}', 'destroy')->name('destroy');
         Route::patch('/{project}/status', 'updateStatus')->name('updateStatus')->middleware('role:Urus Setia');
-        Route::patch('/projects/{project}/remarks', [App\Http\Controllers\ProjectController::class, 'updateRemarks'])->name('projects.remarks.update')->middleware('role:Urus Setia');
+        Route::patch('/{project}/remarks', 'updateRemarks')->name('remarks.update')->middleware('role:Urus Setia');
 
 
         // Route Perincian Projek (Details) - Bersarang di bawah projek
