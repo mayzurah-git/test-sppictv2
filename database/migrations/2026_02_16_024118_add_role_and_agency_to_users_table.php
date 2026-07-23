@@ -10,16 +10,11 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
 
-            $table->foreignId('role_id')
-                  ->after('id')
-                  ->constrained('roles')
-                  ->cascadeOnDelete();
-
-            $table->foreignId('agency_id')
-                  ->nullable()
-                  ->after('role_id')
-                  ->constrained('agencies')
-                  ->nullOnDelete();
+        $table->foreignId('agency_id')
+            ->nullable()
+            ->after('id')
+            ->constrained('agencies')
+            ->nullOnDelete();
 
         });
     }
@@ -28,10 +23,9 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
 
-            $table->dropForeign(['role_id']);
             $table->dropForeign(['agency_id']);
 
-            $table->dropColumn(['role_id', 'agency_id']);
+            $table->dropColumn('agency_id');
 
         });
     }

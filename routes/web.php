@@ -6,6 +6,10 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MeetingController;
 use Illuminate\Support\Facades\Route;
+// use App\Livewire\TestComponent;
+
+
+// Route::get('/test-livewire', TestComponent::class);
 
 Route::get('/', function () {
     return view('welcome');
@@ -98,5 +102,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('meetings.show');
 
         });
+
+        
 
 });

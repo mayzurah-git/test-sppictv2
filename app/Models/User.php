@@ -2,31 +2,35 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Agency;
-use App\Models\Role;
 
+use Spatie\Permission\Traits\HasRoles;
+
+use App\Models\Agency;
+use App\Models\Project;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
+    public const ROLE_SUPER_ADMIN = 'Super Admin';
+    public const ROLE_URUS_SETIA = 'Urus Setia';
+    public const ROLE_PENGURUSAN = 'Pengurusan';
+    public const ROLE_PENGGUNA = 'Pengguna';
+
         protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role_id',
-        'agency_id',
-        ];
+            'name',
+            'email',
+            'password',
+            'agency_id',
+            ];
 
 
     /**
@@ -34,58 +38,52 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+        protected $hidden = [
+            'password',
+            'remember_token',
+        ];
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    public function agency()
-    {
-        return $this->belongsTo(Agency::class);
-    }
-
-public function isSuperadmin()
-{
-    return $this->role->role_name === 'Superadmin';
-}
-
-public function isUrusetia()
-{
-    return $this->role->role_name === 'Urus Setia';
-}
-
-public function isPengguna()
-{
-    return $this->role->role_name === 'Pengguna Biasa';
-}
-
-public function isPengurusan()
-{
-    return $this->role->role_name === 'Pengurusan';
-}
-
-public function projects()
-{
-    return $this->hasMany(Project::class, 'created_by');
-}
+        protected function casts(): array
+        {
+            return [
+                'email_verified_at' => 'datetime',
+                'password' => 'hashed',
+            ];
+        }
 
 
+        public function agency()
+        {
+            return $this->belongsTo(Agency::class);
+        }
+
+        public function projects()
+        {
+            return $this->hasMany(Project::class, 'created_by');
+        }
+
+        public function isSuperAdmin(): bool
+        {
+            return $this->hasRole(self::ROLE_SUPER_ADMIN);
+        }
+
+        public function isUrusSetia(): bool
+        {
+            return $this->hasRole(self::ROLE_URUS_SETIA);
+        }
+
+        public function isPengurusan(): bool
+        {
+            return $this->hasRole(self::ROLE_PENGURUSAN);
+        }
+
+        public function isPengguna(): bool
+        {
+            return $this->hasRole(self::ROLE_PENGGUNA);
+        }
 }
