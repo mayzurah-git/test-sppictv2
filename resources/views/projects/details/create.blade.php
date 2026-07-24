@@ -23,8 +23,14 @@
     </script>
 
     @php
-        $isPenggunaBiasa = auth()->user()->role->role_name === 'Pengguna Biasa';
-        $editable = !$isPenggunaBiasa || in_array($project->application_status, ['Draf', 'Tidak Lengkap']);
+        $user = auth()->user();
+
+        $editable =
+            !$user->isPengguna()
+            || in_array($project->application_status, [
+                'Draf',
+                'Tidak Lengkap'
+            ]);
     @endphp
     <div class="py-6">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">

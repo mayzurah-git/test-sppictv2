@@ -5,8 +5,14 @@
         $pow = floor(log($bytes, 1024));
         return round($bytes / (1024 ** $pow), $precision) . ' ' . $units[$pow];
     }
-    $isPenggunaBiasa = auth()->user()->role->role_name === 'Pengguna Biasa';
-    $editable = !$isPenggunaBiasa || in_array($project->application_status, ['Draf', 'Tidak Lengkap']);
+        $user = auth()->user();
+
+        $editable =
+            !$user->isPengguna()
+            || in_array($project->application_status, [
+                'Draf',
+                'Tidak Lengkap'
+            ]);
 @endphp
 <x-app-layout>
     <div class="py-6">
@@ -99,7 +105,7 @@
                         <input type="file" name="presentation_file" accept=".pdf" class="w-full border rounded px-3 py-2 bg-gray-50">
                     </div>
 
-                    @if($editable)
+                    
                     <div class="flex justify-between items-center mt-8 border-t pt-4">
                         <a href="{{ route('projects.details.create', $project->id) }}" class="text-gray-600 hover:text-gray-800">
                             &larr; Kembali ke Perincian
@@ -113,7 +119,7 @@
                             </a>
                         </div>
                     </div>
-                    @endif
+                    
 
                 </form>
                 @endif

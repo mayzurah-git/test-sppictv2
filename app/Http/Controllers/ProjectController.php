@@ -51,7 +51,7 @@ class ProjectController extends Controller
         ]);
 
         // Untuk keselamatan, paksa 'Pengguna Biasa' menggunakan agensi mereka sendiri
-        $agencyId = $user->role->role_name === 'Pengguna Biasa' ? $user->agency_id : $request->agency_id;
+        $agencyId = $user->hasRole(User::ROLE_PENGGUNA) ? $user->agency_id : $request->agency_id;
 
         $year = date('Y');
 
@@ -106,7 +106,7 @@ class ProjectController extends Controller
     {
         // Pengguna Biasa hanya boleh edit projek berstatus 'Draf' atau 'Tidak Lengkap'.
         $user = Auth::user();
-        if ($user->role->role_name === 'Pengguna Biasa') {
+        if ($user->hasRole(User::ROLE_PENGGUNA)) {
             // Hanya pencipta asal sahaja boleh mengedit
             if ($project->created_by !== $user->id) {
                 abort(403, 'ANDA TIDAK DIBENARKAN MENGEMASKINI PROJEK INI (Hanya pencipta sahaja).');
@@ -122,7 +122,7 @@ class ProjectController extends Controller
     {
         // Pastikan pengguna mempunyai kebenaran untuk edit
         $user = Auth::user();
-        if ($user->role->role_name === 'Pengguna Biasa' && $project->created_by !== $user->id) {
+        if ($user->hasRole(User::ROLE_PENGGUNA) && $project->created_by !== $user->id) {
             abort(403, 'ANDA TIDAK DIBENARKAN MENGEMASKINI PROJEK INI (Hanya pencipta sahaja).');
         }
 
@@ -136,7 +136,7 @@ class ProjectController extends Controller
     {
         // Pastikan pengguna mempunyai kebenaran untuk update
         $user = Auth::user();
-        if ($user->role->role_name === 'Pengguna Biasa' && $project->created_by !== $user->id) {
+        if ($user->hasRole(User::ROLE_PENGGUNA) && $project->created_by !== $user->id) {
             abort(403, 'ANDA TIDAK DIBENARKAN MENGEMASKINI PROJEK INI (Hanya pencipta sahaja).');
         }
 
@@ -197,7 +197,7 @@ class ProjectController extends Controller
     public function updateStatus(Request $request, Project $project)
     {
         // Hanya Urus Setia boleh kemaskini status
-        if (Auth::user()->role->role_name !== 'Urus Setia') { // TODO: Guna Policy
+        if (!Auth::user()->hasRole(User::ROLE_URUS_SETIA)) { // TODO: Guna Policy
             abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI');
         }
 
@@ -263,7 +263,7 @@ class ProjectController extends Controller
     public function updateRemarks(Request $request, Project $project)
     {
         // Hanya Urus Setia boleh kemaskini ulasan
-        if (Auth::user()->role->role_name !== 'Urus Setia') {
+        if (!Auth::user()->hasRole(User::ROLE_URUS_SETIA)) {
             abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI');
         }
 
@@ -303,7 +303,7 @@ class ProjectController extends Controller
     public function createStatusUpdate(Project $project)
     {
         // Double-check authorization even with middleware
-        if (Auth::user()->role->role_name !== 'Urus Setia') {
+        if (!Auth::user()->hasRole(User::ROLE_URUS_SETIA)) {
             abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI.');
         }
 
@@ -327,7 +327,7 @@ class ProjectController extends Controller
         $query = Project::with('agency')->latest();
 
         // Jika pengguna biasa, hadkan kepada projek di bawah agensi mereka sahaja
-        if ($user->role->role_name === 'Pengguna Biasa') {
+        if ($user->hasRole(User::ROLE_PENGGUNA)) {
             $query->where('agency_id', $user->agency_id);
         }
 
@@ -350,7 +350,7 @@ class ProjectController extends Controller
 
         // Dapatkan senarai tahun yang ada dalam database untuk dropdown
         $yearsQuery = Project::selectRaw('YEAR(created_at) as year')->distinct()->orderBy('year', 'desc');
-        if ($user->role->role_name === 'Pengguna Biasa') {
+        if ($user->hasRole(User::ROLE_PENGGUNA)) {
             $yearsQuery->where('agency_id', $user->agency_id);
         }
         $years = $yearsQuery->pluck('year');
@@ -363,15 +363,14 @@ class ProjectController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role->role_name === 'Pengguna Biasa' 
-            && $project->agency_id !== $user->agency_id) {
+        if ($user->hasRole(User::ROLE_PENGGUNA) && $project->agency_id !== $user->agency_id) {
             abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI');
         }
 
         $remarksHistory = collect();
 
         // Hanya ambil sejarah jika pengguna adalah Urus Setia
-        if ($user->isUrusetia()) {
+        if ($user->hasRole(User::ROLE_URUS_SETIA)) {
             $remarksHistory = AuditLog::where('auditable_type', Project::class)
                 ->where('auditable_id', $project->id)
                 ->whereIn('event', ['status_updated', 'remarks_updated'])
@@ -387,8 +386,7 @@ class ProjectController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role->role_name === 'Pengguna Biasa' 
-            && $project->agency_id !== $user->agency_id) {
+        if ($user->hasRole(User::ROLE_PENGGUNA) && $project->agency_id !== $user->agency_id) {
             abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI');
         }
 
@@ -596,7 +594,7 @@ class ProjectController extends Controller
         $this->assertProjectEditable($project);
 
         $user = Auth::user();
-        if ($user->role->role_name === 'Pengguna Biasa' && $project->created_by !== $user->id) {
+        if ($user->hasRole(User::ROLE_PENGGUNA) && $project->created_by !== $user->id) {
             abort(403, 'Hanya pengguna yang mencipta projek ini boleh mengisi maklumat pegawai.');
         }
 
@@ -609,7 +607,7 @@ class ProjectController extends Controller
         $this->assertProjectEditable($project);
         // Semakan kebenaran: Hanya pengguna yang mencipta projek boleh menyimpan maklumat ini.
         $user = Auth::user();
-        if ($user->role->role_name === 'Pengguna Biasa' && $project->created_by !== $user->id) {
+        if ($user->hasRole(User::ROLE_PENGGUNA) && $project->created_by !== $user->id) {
             abort(403, 'Anda tidak dibenarkan untuk menyimpan maklumat pegawai bagi projek ini.');
         }
 
@@ -696,7 +694,7 @@ class ProjectController extends Controller
         $this->assertProjectEditable($project);
         // Semakan kebenaran (Authorization)
         $user = Auth::user();
-        if ($user->role->role_name === 'Pengguna Biasa' && $project->created_by !== $user->id) {
+        if ($user->hasRole(User::ROLE_PENGGUNA) && $project->created_by !== $user->id) {
             abort(403, 'ANDA TIDAK DIBENARKAN MEMADAM PROJEK INI.');
         }
 

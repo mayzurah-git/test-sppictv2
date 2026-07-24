@@ -1,4 +1,7 @@
 <x-app-layout>
+@php
+use App\Models\User;
+@endphp
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
@@ -96,9 +99,14 @@
                             <td class="border px-4 py-2">{{ $project->application_status }}</td>
                             <td class="border px-4 py-2 text-center">
                                 @php
-                                    $isPenggunaBiasa = auth()->user()->role->role_name === 'Pengguna Biasa';
-                                    $isEditableStatus = in_array($project->application_status, ['Draf', 'Tidak Lengkap']);
-                                    $canEdit = !$isPenggunaBiasa || $isEditableStatus;
+                                    $user = auth()->user();
+
+                                    $canEdit =
+                                        !$user->isPengguna()
+                                        || in_array($project->application_status, [
+                                            'Draf',
+                                            'Tidak Lengkap'
+                                        ]);
                                 @endphp
                                 <div class="flex justify-center items-center space-x-2">
                                     {{-- Butang Lihat --}}
@@ -119,7 +127,14 @@
                                     </a>
 
                                     {{-- Butang Tindakan Urus Setia --}}
-                                    @if(auth()->user()->role->role_name === 'Urus Setia' && in_array($project->application_status, ['Hantar - Tunggu Semakan Urus Setia', 'Lengkap', 'Tidak Lengkap']))
+                                    @if(
+                                        auth()->user()->isUrusSetia()
+                                        && in_array($project->application_status, [
+                                            'Hantar - Tunggu Semakan Urus Setia',
+                                            'Lengkap',
+                                            'Tidak Lengkap'
+                                            ])
+                                        )
                                     <a href="{{ route('projects.status.edit', $project->id) }}" title="Tindakan Urus Setia"
                                     class="text-purple-500 hover:text-purple-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

@@ -1,4 +1,9 @@
 <x-app-layout>
+@php
+use App\Models\User;
+
+$user = auth()->user();
+@endphp
     <div class="py-6">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
@@ -167,7 +172,7 @@
             @endif
 
             {{-- Borang Kemaskini Ulasan Sahaja (Urus Setia) --}}
-            @if(Auth::user()->role->role_name === 'Urus Setia')
+            @if($user->isUrusSetia())
             <div class="bg-white shadow-sm sm:rounded-lg p-6 border-t-4 border-indigo-500">
                 <h3 class="text-lg font-semibold mb-4 text-indigo-800">Kemaskini Ulasan (Urus Setia Sahaja)</h3>
                 <form action="{{ route('projects.remarks.update', $project->id) }}" method="POST">
@@ -184,7 +189,7 @@
             @endif
 
             {{-- Card 4: Sejarah Ulasan --}}
-            @if(Auth::user()->isUrusetia())
+            @if($user->isUrusSetia())
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-semibold mb-6 flex items-center text-gray-800">
                     <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

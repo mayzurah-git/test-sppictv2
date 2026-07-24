@@ -1,7 +1,13 @@
 <x-app-layout>
 @php
-    $isPenggunaBiasa = auth()->user()->role->role_name === 'Pengguna Biasa';
-    $editable = !$isPenggunaBiasa || in_array($project->application_status, ['Draf', 'Tidak Lengkap']);
+    $user = auth()->user();
+
+        $editable =
+            !$user->isPengguna()
+            || in_array($project->application_status, [
+                'Draf',
+                'Tidak Lengkap'
+            ]);
 @endphp
     <div class="py-6">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
@@ -25,15 +31,19 @@
                 </div>
 
                 <!-- Butang untuk auto-fill -->
+                @if($editable)
                 <div class="mb-4 text-right">
-                    <button type="button" id="autofill-btn" class="text-sm font-medium text-blue-600 hover:underline focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1 -mt-px" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                        </svg>
+                    <button type="button"
+                            id="autofill-btn"
+                            class="text-sm font-medium text-blue-600 hover:underline">
+                            Guna maklumat profil saya
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1 -mt-px" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
                         Guna maklumat profil saya
                     </button>
                 </div>
-
+                @endif
                 @if($editable)
                 <form method="POST" action="{{ route('projects.officer.store', $project->id) }}">
                     @csrf
@@ -121,7 +131,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+        
             const submitButton = document.getElementById('submit-button');
+            if (!submitButton) {
+                return;
+                }
             const form = submitButton.closest('form');
             const requiredInputs = [
                 document.querySelector('input[name="officer_name"]'),

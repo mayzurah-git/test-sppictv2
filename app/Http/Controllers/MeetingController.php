@@ -15,7 +15,7 @@ class MeetingController extends Controller
     public function index()
     {
         // Pastikan hanya Urus Setia boleh akses (atau gunakan Middleware)
-        if (!auth()->user()->isUrusetia()) {
+        if (!auth()->user()->hasRole('Urus Setia')) {
             abort(403);
         }
 
@@ -25,7 +25,7 @@ class MeetingController extends Controller
 
     public function create()
     {
-        if (!auth()->user()->isUrusetia()) {
+        if (!auth()->user()->hasRole('Urus Setia')) {
             abort(403);
         }
         return view('meetings.create');
@@ -33,7 +33,7 @@ class MeetingController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->user()->isUrusetia()) {
+        if (!auth()->user()->hasRole('Urus Setia')) {
             abort(403);
         }
 
@@ -77,7 +77,7 @@ class MeetingController extends Controller
         // Logik hantar emel jika checkbox ditanda
         if ($request->has('send_notification')) {
             $emails = User::whereHas('role', function($query) {
-                $query->whereIn('role_name', ['Pengguna Biasa', 'Pengurusan']);
+                $query->whereIn('role_name', ['Pengguna', 'Pengurusan']);
             })->pluck('email');
 
             if ($emails->isNotEmpty()) {
@@ -90,7 +90,7 @@ class MeetingController extends Controller
 
     public function edit(Meeting $meeting)
     {
-        if (!auth()->user()->isUrusetia()) {
+        if (!auth()->user()->hasRole('Urus Setia')) {
             abort(403);
         }
         return view('meetings.edit', compact('meeting'));
@@ -98,7 +98,7 @@ class MeetingController extends Controller
 
     public function update(Request $request, Meeting $meeting)
     {
-        if (!auth()->user()->isUrusetia()) {
+        if (!auth()->user()->hasRole('Urus Setia')) {
             abort(403);
         }
 
@@ -156,7 +156,7 @@ class MeetingController extends Controller
 
         if ($request->has('send_notification')) {
             $emails = User::whereHas('role', function($query) {
-                $query->whereIn('role_name', ['Pengguna Biasa', 'Pengurusan']);
+                $query->whereIn('role_name', ['Pengguna', 'Pengurusan']);
             })->pluck('email');
 
             if ($emails->isNotEmpty()) {
@@ -169,7 +169,7 @@ class MeetingController extends Controller
 
     public function destroy(Meeting $meeting)
     {
-        if (!auth()->user()->isUrusetia()) {
+        if (!auth()->user()->hasRole('Urus Setia')) {
             abort(403);
         }
 

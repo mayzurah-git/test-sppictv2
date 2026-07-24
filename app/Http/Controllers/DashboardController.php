@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Meeting;
 use App\Models\Project;
-use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -14,19 +15,23 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
-        if ($user->role->role_name === 'Superadmin') {
+        if ($user->hasRole(User::ROLE_SUPER_ADMIN)) {
             return redirect()->route('superadmin.audit.index');
         }
 
-        if ($user->role->role_name === 'Urus Setia') {
-            return redirect()->route('dashboard.urusetia');
+        if ($user->hasRole(User::ROLE_URUS_SETIA)) {
+            return redirect()->route('dashboard');
         }
 
         // For 'Pengguna Biasa', redirect to their project list
-        if ($user->role->role_name === 'Pengguna Biasa') {
-            return redirect()->route('dashboard.pengguna');
+        if ($user->hasRole(User::ROLE_PENGGUNA)) {
+            return redirect()->route('dashboard');
+        }
+
+        if ($user->hasRole(User::ROLE_PENGURUSAN)) {
+            return redirect()->route('dashboard');
         }
 
         // Fallback for other roles or if a default dashboard view exists
@@ -39,10 +44,11 @@ class DashboardController extends Controller
     public function urusetiaDashboard()
     {
         // This check is good practice, even with middleware, for direct method calls.
-        if (auth()->user()->role->role_name !== 'Urus Setia') {
-            abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI.');
-        }
+        if (! Auth::user()->hasRole('Urus Setia')) {
 
+            abort(403);
+
+        }
         // Get statistics using a single query for efficiency
         $stats = Project::select('application_status', DB::raw('count(*) as total'))
                         ->whereIn('application_status', [
@@ -72,11 +78,13 @@ class DashboardController extends Controller
      */
     public function penggunaDashboard()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // This check is good practice, even with middleware.
-        if (!$user->isPengguna()) {
-            abort(403, 'ANDA TIDAK DIBENARKAN MENGAKSES HALAMAN INI.');
+        if (! Auth::user()->hasRole('Pengguna')) {
+
+            abort(403);
+
         }
 
         // 1. Get Active Meetings

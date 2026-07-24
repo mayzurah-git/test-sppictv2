@@ -18,13 +18,10 @@ Route::get('/', function () {
 require __DIR__.'/auth.php';
 
 // Semua route yang memerlukan pengesahan (authentication)
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth','verified'])->group(function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-    //Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/urusetia', [DashboardController::class, 'urusetiaDashboard'])->name('dashboard.urusetia');
-    Route::get('/dashboard/pengguna', [DashboardController::class, 'penggunaDashboard'])->name('dashboard.pengguna')->middleware('role:Pengguna Biasa');
-
+    Route::get('/dashboard', [DashboardController::class,'index'])
+        ->name('dashboard');
 
     // Route Profil Pengguna
     Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
@@ -34,15 +31,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Dashboard Mengikut Peranan (Role)
-        Route::middleware('role:Superadmin')->prefix('superadmin')->name('superadmin.')->group(function () {
-        //Route::get('/dashboard', fn() => redirect()->route('superadmin.audit.index'))->name('dashboard');
-        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
-    });
+        Route::middleware('role:Super Admin')
+            ->prefix('superadmin')
+            ->name('superadmin.')
+            ->group(function () {
+            
+            Route::get('/audit-logs', [AuditLogController::class, 'index'])
+                ->name('audit.index');
 
+            });
+    
     // Route berkaitan Projek
     Route::controller(ProjectController::class)->prefix('projects')->name('projects.')->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('/create', 'create')->name('create')->middleware('role:Urus Setia,Pengguna Biasa');
+        Route::get('/create', 'create')->name('create')->middleware('role:Urus Setia,Pengguna');
         Route::post('/store-step1', 'storeStep1')->name('storeStep1');
 
         // Route yang memerlukan parameter {project}

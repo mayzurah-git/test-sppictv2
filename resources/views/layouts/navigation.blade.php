@@ -15,11 +15,11 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @if(Auth::user()->isUrusetia())
+                    @role('Urus Setia')
                         <x-nav-link :href="route('meetings.index')" :active="request()->routeIs('meetings.*')">
                             {{ __('Pengurusan Mesyuarat') }}
                         </x-nav-link>
-                    @endif
+                    @endrole
                 </div>
             </div>
 
@@ -75,11 +75,11 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            @if(Auth::user()->isUrusetia())
+            @role('Urus Setia')
                 <x-responsive-nav-link :href="route('meetings.index')" :active="request()->routeIs('meetings.*')">
                     {{ __('Pengurusan Mesyuarat') }}
                 </x-responsive-nav-link>
-            @endif
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->
