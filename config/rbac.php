@@ -146,4 +146,22 @@ return [
         'role' => User::ROLE_SUPER_ADMIN,
 
     ],
+/*
+    |--------------------------------------------------------------------------
+    | Pengguna
+    |--------------------------------------------------------------------------
+    */
+    'pengguna' => [
+
+        'name' => 'Pengguna',
+
+        'email' => 'pengguna@sppict.test',
+
+        'password' => 'password',
+
+        'role' => User::ROLE_PENGGUNA,
+
+    ],
+
+    
 ];

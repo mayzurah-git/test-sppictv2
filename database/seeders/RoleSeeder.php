@@ -36,4 +36,27 @@ class RoleSeeder extends Seeder
             }
         }
     }
+
+    public function rollback(): void
+    {
+        // Padam semua role
+        foreach (config('rbac.roles') as $roleName) {
+            $role = Role::findByName($roleName, 'web');
+            if ($role) {
+                $role->delete();
+            }
+        }
+    }
+
+    public function rollbackPermissions(): void
+    {
+        // Padam semua permission
+        foreach (config('rbac.permissions') as $permissionName) {
+            $permission = Permission::findByName($permissionName, 'web');
+            if ($permission) {
+                $permission->delete();
+            }
+        }
+    }
+
 }

@@ -15,17 +15,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ProjectSubmittedNotification;
+use App\Policies\ProjectPolicy;
 
 
 class ProjectController extends Controller
 {
     public function create()
     {
-        $agencies = Agency::all();
-        return view('projects.create', compact('agencies'));
+        abort_unless(auth()->user()->can('project.create'),403);
     }
 
-    public function storeStep1(Request $request)
+    public function storeStep1(StoreProjectRequest $request)
     {
         $user = Auth::user();
 
